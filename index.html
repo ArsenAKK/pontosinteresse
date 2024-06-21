@@ -171,51 +171,49 @@ map.addControl(new searchControl({ position: 'topright' }));
         popupAnchor: [-1, -35] // ponto de ancoragem do popup
     });
     
-    // variável para o marcador do utilizador e controle de zoom
+    // Variáveis para o marcador e o círculo do utilizador
     var userMarker;
     var userCircle;
-    var zoomDone = false;
     
+    // Função para localizar o utilizador no mapa
     function onLocationFound(e) {
-        var userLocation = e.latlng;
+        var latlng = e.latlng;
     
-        // Se o marcador já existir, atualiza a localização
+        // Se o marcador já existir, atualize sua posição
         if (userMarker) {
-            userMarker.setLatLng(userLocation);
-            userCircle.setLatLng(userLocation);
+            userMarker.setLatLng(latlng);
+            userCircle.setLatLng(latlng);
         } else {
-            // Se o marcador não existir, crie um novo marcador e círculo
-            userMarker = L.marker(userLocation, {icon: customIcon}).addTo(map)
+            // Crie o marcador e o círculo na primeira vez
+            userMarker = L.marker(latlng, {icon: customIcon}).addTo(map)
                 .bindPopup("<b>Estás aqui</b>").openPopup();
-    
-            userCircle = L.circle(userLocation, {
+            
+            userCircle = L.circle(latlng, {
                 weight: 3,
-                color: 'blue', 
-                fillColor: 'blue',
-                fillOpacity: 0.5,
-                radius: 25
+                color: 'blue', // cor da linha do círculo
+                fillColor: 'blue', // cor de preenchimento do círculo
+                fillOpacity: 0.5, // opacidade do preenchimento
+                radius: 25 // raio do círculo
             }).addTo(map);
-        }
-    
-        if (!zoomDone) {
-            map.setView(userLocation, 16);
-            zoomDone = true;
         }
     }
     
+    // Adicione o evento de localização encontrada ao mapa
     map.on('locationfound', onLocationFound);
     
-    // Solicitar localização do usuário com atualização contínua e configuração rápida
-    map.locate({
-        watch: true,
-        setView: false, // não ajustar o zoom após a primeira vez
-        maxZoom: 16,
-        enableHighAccuracy: true, // tentar obter a localização mais precisa possível
-        maximumAge: 1000, // cache de localização de no máximo 1 segundo
-        timeout: 10000 // tempo limite para localização de 10 segundos
-    });
-</script>
+    // Função para solicitar a localização do utilizador
+    function locateUser() {
+        map.locate({setView: true, maxZoom: 16});
+    }
     
+    // Solicite a localização do utilizador inicialmente
+    locateUser();
+    
+    // Atualize a localização do utilizador a cada 3 segundos
+    setInterval(locateUser, 3000);
+    </script>
+    
+
 <!-- Mensagem de erro -->
 <script>
     function onLocationError(e) {
